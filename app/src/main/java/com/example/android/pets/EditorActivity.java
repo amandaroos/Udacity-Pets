@@ -17,6 +17,7 @@ package com.example.android.pets;
 
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -31,7 +32,6 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.example.android.pets.data.PetContract;
-import com.example.android.pets.data.PetDbHelper;
 
 import static com.example.android.pets.data.PetContract.PetEntry.GENDER_FEMALE;
 import static com.example.android.pets.data.PetContract.PetEntry.GENDER_MALE;
@@ -114,16 +114,9 @@ public class EditorActivity extends AppCompatActivity {
     }
 
     /**
-     * Get use input from editor and save new pet in database
+     * Get user input from editor and save new pet in database
      */
     private void insertPet(){
-
-        //instantiate our subclass of SQLiteOpenHelper
-        PetDbHelper mDbHelper = new PetDbHelper(this);
-
-        // Gets the data repository in write mode
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
-
         //Get pet data from user input
         String nameString = mNameEditText.getText().toString().trim();
         String breedString = mBreedEditText.getText().toString().trim();
@@ -137,14 +130,14 @@ public class EditorActivity extends AppCompatActivity {
         values.put(PetContract.PetEntry.COLUMN_PET_GENDER, mGender);
         values.put(PetContract.PetEntry.COLUMN_PET_WEIGHT, weight);
 
-        // Insert the new row, returning the primary key value of the new row
-        long newRowId = db.insert(PetContract.PetEntry.TABLE_NAME, null, values);
+        // Insert the new row using PetProvider
+        Uri newUri = getContentResolver().insert(PetContract.PetEntry.CONTENT_URI,values);
 
-        if (newRowId == -1) {
-            Toast.makeText(getApplicationContext(), "Error with saving pet", Toast.LENGTH_SHORT).show();
+        if (newUri != null) {
+            Toast.makeText(getApplicationContext(), getString(R.string.editor_insert_pet_successful), Toast.LENGTH_SHORT).show();
         }
         else{
-            Toast.makeText(getApplicationContext(), "Pet saved with id: " + newRowId, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), getString(R.string.editor_insert_pet_failed), Toast.LENGTH_SHORT).show();
         }
 
     }
