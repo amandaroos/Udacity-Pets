@@ -27,10 +27,12 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.android.pets.data.PetContract.PetEntry;
+
+import java.util.List;
 
 /**
  * Displays list of pets that were entered and stored in the app.
@@ -52,10 +54,13 @@ public class CatalogActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        Log.e("FAB button", "created");
+
     }
 
     @Override
-    protected void onStart(){
+    protected void onStart() {
         super.onStart();
         displayDatabaseInfo();
     }
@@ -66,7 +71,7 @@ public class CatalogActivity extends AppCompatActivity {
      */
     private void displayDatabaseInfo() {
         //include all columns in projection for the query
-        String [] projection = {
+        String[] projection = {
                 PetEntry._ID,
                 PetEntry.COLUMN_PET_NAME,
                 PetEntry.COLUMN_PET_BREED,
@@ -74,72 +79,39 @@ public class CatalogActivity extends AppCompatActivity {
                 PetEntry.COLUMN_PET_WEIGHT
         };
 
-        //Get a Cursor that contains all rows from the pets table.
-
         //The cursor should not be interacting with the database directly
         /**Cursor cursor = db.query(
-                PetEntry.TABLE_NAME,
-                projection,
-                null,
-                null,
-                null,
-                null,
-                null);
+         PetEntry.TABLE_NAME,
+         projection,
+         null,
+         null,
+         null,
+         null,
+         null);
          **/
 
+        //Get a Cursor that contains all rows from the pets table.
         Cursor cursor = getContentResolver().query(
                 PetEntry.CONTENT_URI,   //The content URI of the pets table
                 projection,             //The columns to return for each row
                 null, null, null);
+        //TODO: when do I close the cursor?
 
-        TextView displayView = (TextView) findViewById(R.id.text_view_pet);
 
-        try {
-            // Create a header in the Text View that looks like this:
-            //
-            // The pets table contains <number of rows in Cursor> pets.
-            // _id - name - breed - gender - weight
-            //
-            // In the while loop below, iterate through the rows of the cursor and display
-            // the information from each column in this order.
-            displayView.setText("The pets table contains " + cursor.getCount() + " pets.\n\n");
-            displayView.append(PetEntry._ID + " - " +
-                    PetEntry.COLUMN_PET_NAME + " - " +
-                    PetEntry.COLUMN_PET_BREED + " - " +
-                    PetEntry.COLUMN_PET_GENDER + " - " +
-                    PetEntry.COLUMN_PET_WEIGHT + "\n");
+        Log.e("DisplayDatabaseInfo", "cursor created");
 
-            // Figure out the index of each column
-            int idColumnIndex = cursor.getColumnIndex(PetEntry._ID);
-            int nameColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_NAME);
-            int breedColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_BREED);
-            int genderColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_GENDER);
-            int weightColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_WEIGHT);
+        //Find ListView to populate
+        ListView petItems = (ListView) findViewById(R.id.list_view_pet);
 
-            // Iterate through all the returned rows in the cursor
-            while (cursor.moveToNext()) {
-                // Use that index to extract the String or Int value of the word
-                // at the current row the cursor is on.
-                int currentID = cursor.getInt(idColumnIndex);
-                String currentName = cursor.getString(nameColumnIndex);
-                String currentBreed = cursor.getString(breedColumnIndex);
-                int currentGender = cursor.getInt(genderColumnIndex);
-                int currentWeight = cursor.getInt(weightColumnIndex);
-                // Display the values from each column of the current row in the cursor in the TextView
-                displayView.append(("\n" + currentID + " - " +
-                        currentName + " - " +
-                        currentBreed + " - " +
-                        currentGender + " - " +
-                        currentWeight));
-            }
-        }finally {
-            // Always close the cursor when you're done reading from it. This releases all its
-            // resources and makes it invalid.
-            cursor.close();
-        }
+        //Setup cursor adapter to create a list item for each orw of pet data in the Cursor
+        PetCursorAdapter petAdapter = new PetCursorAdapter(this, cursor);
+
+        //Attach cursor adapter to the ListView
+        petItems.setAdapter(petAdapter);
     }
 
-    private void insertPet(){
+    //Inserts hardcoded pet data into the database. For debugging only
+    private void insertPet() {
 
         // Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
@@ -154,8 +126,7 @@ public class CatalogActivity extends AppCompatActivity {
 
         if (newUri != null) {
             Toast.makeText(getApplicationContext(), getString(R.string.editor_insert_pet_successful), Toast.LENGTH_SHORT).show();
-        }
-        else{
+        } else {
             Toast.makeText(getApplicationContext(), getString(R.string.editor_insert_pet_failed), Toast.LENGTH_SHORT).show();
         }
 
