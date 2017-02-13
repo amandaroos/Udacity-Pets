@@ -116,12 +116,14 @@ public class CatalogActivity extends AppCompatActivity {
     //Inserts hardcoded pet data into the database. For debugging only
     private void insertPet() {
 
+        Log.e("insertPet","called");
+
         // Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
         values.put(PetEntry.COLUMN_PET_NAME, "Inca");
         values.put(PetEntry.COLUMN_PET_BREED, "Greyhound");
         values.put(PetEntry.COLUMN_PET_GENDER, PetEntry.GENDER_MALE);
-        values.put(PetEntry.COLUMN_PET_WEIGHT, 7);
+        values.put(PetEntry.COLUMN_PET_WEIGHT, 2);
 
         // Insert the new row using the ContentResolver
         //Receive the new content URI
