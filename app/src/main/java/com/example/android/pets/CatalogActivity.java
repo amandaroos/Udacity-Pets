@@ -55,8 +55,12 @@ public class CatalogActivity extends AppCompatActivity {
             }
         });
 
-        Log.e("FAB button", "created");
+        //Find the ListView which will be populated with the pet data
+        ListView petListView = (ListView) findViewById(R.id.list_view_pet);
 
+        //Find and set empty view on the ListView so that it only shows when the list has 0 items.
+        View emptyView = findViewById(R.id.empty_view);
+        petListView.setEmptyView(emptyView);
     }
 
     @Override
@@ -97,9 +101,6 @@ public class CatalogActivity extends AppCompatActivity {
                 null, null, null);
         //TODO: when do I close the cursor?
 
-
-        Log.e("DisplayDatabaseInfo", "cursor created");
-
         //Find ListView to populate
         ListView petItems = (ListView) findViewById(R.id.list_view_pet);
 
@@ -108,6 +109,8 @@ public class CatalogActivity extends AppCompatActivity {
 
         //Attach cursor adapter to the ListView
         petItems.setAdapter(petAdapter);
+
+
     }
 
     //Inserts hardcoded pet data into the database. For debugging only
