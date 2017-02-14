@@ -15,7 +15,12 @@
  */
 package com.example.android.pets;
 
+import android.app.LoaderManager;
+import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.CursorLoader;
+import android.content.Loader;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
@@ -30,9 +35,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.android.pets.data.PetContract;
+import com.example.android.pets.data.PetContract.PetEntry;
 
 import static com.example.android.pets.data.PetContract.PetEntry.GENDER_FEMALE;
 import static com.example.android.pets.data.PetContract.PetEntry.GENDER_MALE;
@@ -41,7 +47,7 @@ import static com.example.android.pets.data.PetContract.PetEntry.GENDER_UNKNOWN;
 /**
  * Allows user to create a new pet or edit an existing one.
  */
-public class EditorActivity extends AppCompatActivity {
+public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     /** EditText field to enter the pet's name */
     private EditText mNameEditText;
@@ -60,6 +66,9 @@ public class EditorActivity extends AppCompatActivity {
      * 0 for unknown gender, 1 for male, 2 for female.
      */
     private int mGender = GENDER_UNKNOWN;
+
+    //Loader number
+    public static final int PET_LOADER = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +97,9 @@ public class EditorActivity extends AppCompatActivity {
         mGenderSpinner = (Spinner) findViewById(R.id.spinner_gender);
 
         setupSpinner();
+
+        //initialize Loader
+        getLoaderManager().initLoader(PET_LOADER, null, this);
     }
 
     /**
@@ -141,13 +153,13 @@ public class EditorActivity extends AppCompatActivity {
 
         // Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
-        values.put(PetContract.PetEntry.COLUMN_PET_NAME, nameString);
-        values.put(PetContract.PetEntry.COLUMN_PET_BREED, breedString);
-        values.put(PetContract.PetEntry.COLUMN_PET_GENDER, mGender);
-        values.put(PetContract.PetEntry.COLUMN_PET_WEIGHT, weight);
+        values.put(PetEntry.COLUMN_PET_NAME, nameString);
+        values.put(PetEntry.COLUMN_PET_BREED, breedString);
+        values.put(PetEntry.COLUMN_PET_GENDER, mGender);
+        values.put(PetEntry.COLUMN_PET_WEIGHT, weight);
 
         // Insert the new row using PetProvider
-        Uri newUri = getContentResolver().insert(PetContract.PetEntry.CONTENT_URI,values);
+        Uri newUri = getContentResolver().insert(PetEntry.CONTENT_URI,values);
 
         if (newUri != null) {
             Toast.makeText(getApplicationContext(), getString(R.string.editor_insert_pet_successful), Toast.LENGTH_SHORT).show();
@@ -188,5 +200,66 @@ public class EditorActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        //Define a projection that specifies the columns from the table we care about
+        String[] projection = new String[] {
+                PetEntry._ID,
+                PetEntry.COLUMN_PET_NAME,
+                PetEntry.COLUMN_PET_BREED,
+                PetEntry.COLUMN_PET_GENDER,
+                PetEntry.COLUMN_PET_WEIGHT
+        };
+
+        //The Uri for the current pet
+        Uri currentPetUri = getIntent().getData();
+
+        Log.e("Current Pet Uri in Editor onCreateLoader", currentPetUri.toString());
+
+        //This loader will execute the ContentProvider's query method on a background thread
+        return new CursorLoader(this,
+                currentPetUri,
+                projection,
+                null,
+                null,
+                null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        //TODO Adapt this code for EditorActivity
+
+        //need to set Cursor to 0th position
+        cursor.moveToFirst();
+
+        //find views to populate in inflated layout
+        TextView nameTextView = (TextView) findViewById(R.id.edit_pet_name);
+        TextView breedTextView = (TextView) findViewById(R.id.edit_pet_breed);
+        TextView weightTextView = (TextView) findViewById(R.id.edit_pet_weight);
+
+
+
+        //Find the columns of pet attributes we are interested in
+        int nameColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_NAME);
+        int breedColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_BREED);
+        int weightColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_WEIGHT);
+
+        //Read attributes from the Cursor for the current pet
+        String petName = cursor.getString(nameColumnIndex);
+        String petBreed = cursor.getString(breedColumnIndex);
+        int petWeight = cursor.getInt(weightColumnIndex);
+
+        //Populate views with extracted daa
+        nameTextView.setText(petName);
+        breedTextView.setText(petBreed);
+        weightTextView.setText(String.valueOf(petWeight));
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
     }
 }

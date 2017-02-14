@@ -88,7 +88,7 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
             }
         });
 
-
+        //initialize Loader
         getLoaderManager().initLoader(PET_LOADER, null, this);
     }
 
