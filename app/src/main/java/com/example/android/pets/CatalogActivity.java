@@ -16,6 +16,7 @@
 package com.example.android.pets;
 
 import android.app.LoaderManager;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Intent;
@@ -29,6 +30,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -69,6 +71,23 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
         //There is no pet data yet (until the loader finishes) so pass in null for the Cursor
         mCursorAdapter = new PetCursorAdapter(this, null);
         petListView.setAdapter(mCursorAdapter);
+
+        petListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                Intent intent = new Intent(CatalogActivity.this, EditorActivity.class);
+
+                //Append the id of the current pet to the content URI
+                Uri currentPetUri = ContentUris.withAppendedId(PetEntry.CONTENT_URI, id);
+
+                //Set the URI on the data field of the intent
+                intent.setData(currentPetUri);
+
+                startActivity(intent);
+            }
+        });
+
 
         getLoaderManager().initLoader(PET_LOADER, null, this);
     }
@@ -123,8 +142,6 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
 
     //Inserts hardcoded pet data into the database. For debugging only
     private void insertPet() {
-
-        Log.e("insertPet","called");
 
         // Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();

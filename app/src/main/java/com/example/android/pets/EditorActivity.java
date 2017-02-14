@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -64,6 +65,21 @@ public class EditorActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
+
+        //Use getIntent() and getData()to get the associated URI
+        Uri currentPetUri = getIntent().getData();
+
+        //Set title of the EditorActivity.
+        //Set title to "Edit Pet" if ListView item was selected
+        //Otherwise, change app bar to say "Add a Pet"
+        if (currentPetUri != null){
+            //This is an existing pet that is being edited
+            setTitle("Edit Pet");
+        }
+        else {
+            //This is a new pet that is being added
+            setTitle(getString(R.string.editor_activity_title_new_pet));
+        }
 
         // Find all relevant views that we will need to read user input from
         mNameEditText = (EditText) findViewById(R.id.edit_pet_name);
