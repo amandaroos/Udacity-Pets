@@ -69,12 +69,14 @@ public class PetCursorAdapter extends CursorAdapter {
         String petName = cursor.getString(nameColumnIndex);
         String petBreed = cursor.getString(breedColumnIndex);
 
+        // If the pet breed is empty string or null, then use some default text
+        // that says "Unknown breed", so the TextView isn't blank.
+        if (TextUtils.isEmpty(petBreed)){
+            breedTextView.setText(R.string.catalog_default_breed);
+        }
+
         //Populate views with extracted daa
         nameTextView.setText(petName);
         breedTextView.setText(petBreed);
-
-        if (TextUtils.isEmpty(breedTextView.getText())){
-            breedTextView.setText(R.string.catalog_default_breed);
-        }
     }
 }

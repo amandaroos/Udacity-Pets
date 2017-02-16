@@ -340,7 +340,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
             // Gender is a dropdown spinner, so map the constant value from the database
             // into one of the dropdown options (0 is Unknown, 1 is Male, 2 is Female).
-            // Then call setSelection() so that option is displayed on screen as the current selection.
+            // Then call setSelection() so that option is displayed on screen as current selection.
             switch (petGender) {
                 case PetEntry.GENDER_MALE:
                     mGenderSpinner.setSelection(1);

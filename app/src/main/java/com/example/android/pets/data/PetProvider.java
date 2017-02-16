@@ -216,7 +216,8 @@ public class PetProvider extends ContentProvider {
 
     //returns number of rows affected
     @Override
-    public int update(Uri uri, ContentValues contentValues, String selection, String[] selectionArgs) {
+    public int update(Uri uri, ContentValues contentValues, String selection,
+                      String[] selectionArgs) {
         final int match = sUriMatcher.match(uri);
         switch (match) {
             case PETS:
@@ -261,7 +262,8 @@ public class PetProvider extends ContentProvider {
             }
         }
 
-        // If weight column is present in ContentValues, check that the weight is greater than or equal to 0
+        // If weight column is present in ContentValues, check that the weight is greater than or
+        // equal to 0
         if (values.containsKey(PetEntry.COLUMN_PET_WEIGHT)) {
             Integer weight = values.getAsInteger(PetEntry.COLUMN_PET_WEIGHT);
             if (weight != null && weight < 0) {

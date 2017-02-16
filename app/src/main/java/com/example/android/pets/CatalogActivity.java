@@ -157,7 +157,8 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
         if (newUri != null) {
             Toast.makeText(getApplicationContext(), getString(R.string.editor_insert_pet_successful), Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(getApplicationContext(), getString(R.string.editor_insert_pet_failed), Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), getString(R.string.editor_insert_pet_failed),
+                    Toast.LENGTH_SHORT).show();
         }
 
     }
