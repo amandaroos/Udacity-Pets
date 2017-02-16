@@ -29,6 +29,7 @@ import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -212,7 +213,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         String valuesData = String.valueOf(values);
 
         if (mCurrentPetUri != null) {
-            //update content resolver with updated pet information
+            //pass the content resolver the updated pet information
             int rowsAffected = getContentResolver().update(mCurrentPetUri, values, null, null);
 
             // Show a toast message depending on whether or not the update was successful.
@@ -258,10 +259,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 return true;
             // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
-                //Delete pet from database
-                deletePet();
-                //Exit activity
-                finish();
+                //Open dialog to warn user of the deletion
+                showDeleteConfirmationDialog();
                 return true;
             // Respond to a click on the "Up" arrow button in the app bar
             case android.R.id.home:
@@ -314,41 +313,45 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     //Update the editor fields with the data for the current pet
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        //need to set Cursor to 0th position
-        cursor.moveToFirst();
 
-        //Find the columns of pet attributes we are interested in
-        int nameColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_NAME);
-        int breedColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_BREED);
-        int weightColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_WEIGHT);
+        //Check to see if cursor is empty
+        if (cursor.getCount()>0) {
+            //need to set Cursor to 0th position
+            cursor.moveToFirst();
 
-        //Read attributes from the Cursor for the current pet
-        String petName = cursor.getString(nameColumnIndex);
-        String petBreed = cursor.getString(breedColumnIndex);
-        int petWeight = cursor.getInt(weightColumnIndex);
+            //Find the columns of pet attributes we are interested in
+            int nameColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_NAME);
+            int breedColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_BREED);
+            int weightColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_WEIGHT);
 
-        //Populate views with extracted daa
-        mNameEditText.setText(petName);
-        mBreedEditText.setText(petBreed);
-        mWeightEditText.setText(String.valueOf(petWeight));
+            //Read attributes from the Cursor for the current pet
+            String petName = cursor.getString(nameColumnIndex);
+            String petBreed = cursor.getString(breedColumnIndex);
+            int petWeight = cursor.getInt(weightColumnIndex);
 
-        //Spinner
-        int genderColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_GENDER);
-        int petGender = cursor.getInt(genderColumnIndex);
+            //Populate views with extracted daa
+            mNameEditText.setText(petName);
+            mBreedEditText.setText(petBreed);
+            mWeightEditText.setText(String.valueOf(petWeight));
 
-        // Gender is a dropdown spinner, so map the constant value from the database
-        // into one of the dropdown options (0 is Unknown, 1 is Male, 2 is Female).
-        // Then call setSelection() so that option is displayed on screen as the current selection.
-        switch (petGender) {
-            case PetEntry.GENDER_MALE:
-                mGenderSpinner.setSelection(1);
-                break;
-            case PetEntry.GENDER_FEMALE:
-                mGenderSpinner.setSelection(2);
-                break;
-            default:
-                mGenderSpinner.setSelection(0);
-                break;
+            //Spinner
+            int genderColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_GENDER);
+            int petGender = cursor.getInt(genderColumnIndex);
+
+            // Gender is a dropdown spinner, so map the constant value from the database
+            // into one of the dropdown options (0 is Unknown, 1 is Male, 2 is Female).
+            // Then call setSelection() so that option is displayed on screen as the current selection.
+            switch (petGender) {
+                case PetEntry.GENDER_MALE:
+                    mGenderSpinner.setSelection(1);
+                    break;
+                case PetEntry.GENDER_FEMALE:
+                    mGenderSpinner.setSelection(2);
+                    break;
+                default:
+                    mGenderSpinner.setSelection(0);
+                    break;
+            }
         }
     }
 
@@ -448,7 +451,27 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
      * Perform the deletion of the pet in the database.
      */
     private void deletePet() {
-        // TODO: Implement this method
+
+        // Only perform the delete if this is an existing pet.
+        if (mCurrentPetUri != null) {
+            // Call the ContentResolver to delete the pet at the given content URI.
+            // Pass in null for the selection and selection args because the mCurrentPetUri
+            // content URI already identifies the pet that we want.
+            int rowsDeleted = getContentResolver().delete(mCurrentPetUri, null, null);
+
+            if (rowsDeleted == 0) {
+                // If no rows were affected, then there was an error with deleting the row
+                Toast.makeText(this, getString(R.string.editor_delete_pet_failed),
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                // Otherwise, the delete was successful and we can display a toast.
+                Toast.makeText(this, getString(R.string.editor_delete_pet_successful),
+                        Toast.LENGTH_SHORT).show();
+
+                //Exit activity
+                finish();
+            }
+        }
     }
 
 }
