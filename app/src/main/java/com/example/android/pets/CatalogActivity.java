@@ -181,7 +181,8 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
                 return true;
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
-                // Do nothing for now
+                // Delete all pets from the table
+                deleteAllPets();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -218,5 +219,25 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
         // above is about to be closed.  We need to make sure we are no
         // longer using it.
         mCursorAdapter.swapCursor(null);
+    }
+
+    private void deleteAllPets(){
+
+            // Call the ContentResolver to delete the pet at the given content URI.
+            // Pass in null for the selection and selection args because the mCurrentPetUri
+            // content URI already identifies the pet that we want.
+            int rowsDeleted = getContentResolver().delete(PetEntry.CONTENT_URI, null, null);
+
+            if (rowsDeleted == 0) {
+                // If no rows were affected, then there was an error with deleting the row
+                Toast.makeText(this, "Error with deleting all pets",
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                // Otherwise, the delete was successful and we can display a toast.
+                Toast.makeText(this, "All pets deleted",
+                        Toast.LENGTH_SHORT).show();
+            }
+
+
     }
 }
