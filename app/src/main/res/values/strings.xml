@@ -100,4 +100,7 @@
 
     <!-- Dialog button text for the option to cancel deletion of the current pet [CHAR LIMIT=20] -->
     <string name="cancel">Cancel</string>
+
+    <!--Default breed shown for a pet in CatalogActivity if the breed is unknown-->
+    <string name="catalog_default_breed">Unknown breed</string>
 </resources>

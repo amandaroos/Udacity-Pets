@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.support.v4.view.LayoutInflaterCompat;
 import android.support.v4.widget.CursorAdapter;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -71,5 +72,9 @@ public class PetCursorAdapter extends CursorAdapter {
         //Populate views with extracted daa
         nameTextView.setText(petName);
         breedTextView.setText(petBreed);
+
+        if (TextUtils.isEmpty(breedTextView.getText())){
+            breedTextView.setText(R.string.catalog_default_breed);
+        }
     }
 }
